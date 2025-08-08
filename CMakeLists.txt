@@ -23,7 +23,7 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-set(PICO_BOARD pico_w CACHE STRING "Board type")
+set(PICO_BOARD pico2_w CACHE STRING "Board type")
 
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
@@ -35,21 +35,26 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(PruebaRTOS PruebaRTOS.c )
+add_executable(PruebaRTOS 
+    PruebaRTOS.c
+    mpu.c)
 
 pico_set_program_name(PruebaRTOS "PruebaRTOS")
 pico_set_program_version(PruebaRTOS "0.1")
 
+
+
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(PruebaRTOS 0)
-pico_enable_stdio_usb(PruebaRTOS 0)
+pico_enable_stdio_usb(PruebaRTOS 1)
 
 # Añadir la subcarpeta donde está la biblioteca FreeRTOS
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/freertos ${CMAKE_BINARY_DIR}/freertos)
 
 # Add the standard library to the build
 target_link_libraries(PruebaRTOS
-        pico_stdlib freertos)
+        pico_stdlib 
+        freertos )
 
 # Add the standard include files to the build
 target_include_directories(PruebaRTOS PRIVATE
@@ -58,10 +63,15 @@ target_include_directories(PruebaRTOS PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(PruebaRTOS 
-        hardware_spi
-        pico_cyw43_arch_lwip_threadsafe_background
         freertos
+        hardware_adc
+        hardware_pwm
+        pico_stdlib
+        pico_stdio_usb
         )
 
 pico_add_extra_outputs(PruebaRTOS)
+
+add_subdirectory(rpipico-lcd-main)
+target_link_libraries(PruebaRTOS lcd)
 
